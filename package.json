@@ -1,6 +1,6 @@
 {
   "name": "homebridge-sleeptracker",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "displayName": "SleepTracker",
   "description": "Homebridge plugin for SleepTracker smart beds - Control your bed's position and features through HomeKit",
   "main": "dist/index.js",
@@ -20,6 +20,7 @@
   },
   "keywords": [
     "homebridge-plugin",
+    "homebridge",
     "homekit",
     "smart-bed",
     "sleeptracker",
