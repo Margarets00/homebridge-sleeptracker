@@ -23,6 +23,7 @@ export class SleepTrackerClient {
   constructor(
     private readonly username: string,
     private readonly password: string,
+    private readonly deviceId: string,
   ) {
     const baseUrl = 'tsi.sleeptracker.com';
     const authHost = `auth.${baseUrl}`;
@@ -78,39 +79,40 @@ export class SleepTrackerClient {
     return response.data.helloData;
   }
 
-  async getDeviceSnapshot(deviceId: string): Promise<DeviceSnapshot> {
+  async getDeviceSnapshot(command: Commands): Promise<DeviceSnapshot> {
     await this.authenticate();
+    const commandValue = this.getCommandValue(command);
     const response = await this.api.post('/adjustableBaseControls', {
       ...CLIENT_INFO,
       id: 'TEST_ANDROID_adjustableBaseControls',
-      sleeptrackerProcessorID: deviceId,
-      bedControlCommand: Commands.Status,
+      sleeptrackerProcessorID: this.deviceId,
+      bedControlCommand: commandValue
     });
     return response.data.body.snapshots[0];
   }
 
-  private getCommandValue(command: Commands): number {
+  private getCommandValue(command: Commands): string {
     switch (command) {
       case Commands.Status:
-        return 1;
+        return "1";
       case Commands.HeadUp:
-        return 100;
+        return "100";
       case Commands.HeadDown:
-        return 101;
+        return "101";
       case Commands.FootUp:
-        return 102;
+        return "102";
       case Commands.FootDown:
-        return 103;
+        return "103";
       case Commands.Flat:
-        return 2;
+        return "2";
       case Commands.ZeroG:
-        return 0;
+        return "0";
       case Commands.AntiSnore:
-        return 4;
+        return "4";
       case Commands.TV:
-        return 3;
+        return "3";
       case Commands.Stop:
-        return 107; // Head stop, could also be 108 for foot stop
+        return "107";
       default:
         throw new Error(`Unknown command: ${command}`);
     }

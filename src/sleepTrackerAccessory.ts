@@ -33,6 +33,7 @@ export class SleepTrackerAccessory {
     this.client = new SleepTrackerClient(
       this.platform.config.username,
       this.platform.config.password,
+      this.platform.config.deviceId
     );
 
     this.accessory.getService(this.platform.Service.AccessoryInformation)!
@@ -125,13 +126,13 @@ export class SleepTrackerAccessory {
     }
 
     try {
-      const snapshot = await this.client.getDeviceSnapshot(this.platform.config.deviceId);
+      const snapshots = await this.client.getDeviceSnapshot(Commands.Status);
       
       // Update position states and last known state
-      this.headPosition = snapshot.headPosition;
-      this.footPosition = snapshot.footPosition;
-      this.lastKnownState.head = snapshot.headPosition;
-      this.lastKnownState.foot = snapshot.footPosition;
+      this.headPosition = snapshots.headPosition;
+      this.footPosition = snapshots.footPosition;
+      this.lastKnownState.head = snapshots.headPosition;
+      this.lastKnownState.foot = snapshots.footPosition;
 
       // Update environment sensors if available
       if (this.temperatureService || this.humidityService) {

@@ -34,12 +34,12 @@
     "dist",
     "config.schema.json"
   ],
-  "homepage": "https://github.com/yourusername/homebridge-sleeptracker#readme",
+  "homepage": "https://github.com/Margarets00/homebridge-sleeptracker#readme",
   "repository": {
     "type": "git",
-    "url": "git://github.com/yourusername/homebridge-sleeptracker.git"
+    "url": "https://github.com/Margarets00/homebridge-sleeptracker"
   },
   "bugs": {
-    "url": "https://github.com/yourusername/homebridge-sleeptracker/issues"
+    "url": "https://github.com/Margarets00/homebridge-sleeptracker"
   }
 } 
