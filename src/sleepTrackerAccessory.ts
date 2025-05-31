@@ -5,20 +5,19 @@ import { Commands } from './api/types';
 
 export class SleepTrackerAccessory {
   private client: SleepTrackerClient;
-  private headService: Service;
-  private footService: Service;
+  private headUpService: Service;
+  private headDownService: Service;
+  private footUpService: Service;
+  private footDownService: Service;
+  private flatPresetService: Service;
+  private zeroGPresetService: Service;
+  private antiSnorePresetService: Service;
   private tvPresetService: Service;
   private temperatureService?: Service;
   private humidityService?: Service;
 
-  private headPosition = 0;
-  private footPosition = 0;
-  private maxHeadAngle = 60;
-  private maxFootAngle = 45;
   private isInitialized = false;
   private lastKnownState = {
-    head: 0,
-    foot: 0,
     temperature: null as number | null,
     humidity: null as number | null,
   };
@@ -41,43 +40,74 @@ export class SleepTrackerAccessory {
       .setCharacteristic(this.platform.Characteristic.Model, 'Smart Bed')
       .setCharacteristic(this.platform.Characteristic.SerialNumber, this.platform.config.deviceId);
 
-    // Head position service
-    this.headService = this.accessory.getService('Head Position') ||
-      this.accessory.addService(this.platform.Service.Lightbulb, 'Head Position', 'head');
+    // Head Up switch
+    this.headUpService = this.accessory.getService('Head Up') ||
+      this.accessory.addService(this.platform.Service.Switch, 'Head Up', 'head-up');
 
-    this.headService.getCharacteristic(this.platform.Characteristic.On)
-      .onSet(this.setHeadOn.bind(this))
-      .onGet(this.getHeadOn.bind(this));
+    this.headUpService.getCharacteristic(this.platform.Characteristic.On)
+      .onSet(this.setHeadUp.bind(this))
+      .onGet(this.getHeadUp.bind(this));
 
-    this.headService.getCharacteristic(this.platform.Characteristic.Brightness)
-      .onSet(this.setHeadPosition.bind(this))
-      .onGet(this.getHeadPosition.bind(this));
+    // Head Down switch
+    this.headDownService = this.accessory.getService('Head Down') ||
+      this.accessory.addService(this.platform.Service.Switch, 'Head Down', 'head-down');
 
-    // Foot position service
-    this.footService = this.accessory.getService('Foot Position') ||
-      this.accessory.addService(this.platform.Service.Lightbulb, 'Foot Position', 'foot');
+    this.headDownService.getCharacteristic(this.platform.Characteristic.On)
+      .onSet(this.setHeadDown.bind(this))
+      .onGet(this.getHeadDown.bind(this));
 
-    this.footService.getCharacteristic(this.platform.Characteristic.On)
-      .onSet(this.setFootOn.bind(this))
-      .onGet(this.getFootOn.bind(this));
+    // Foot Up switch
+    this.footUpService = this.accessory.getService('Foot Up') ||
+      this.accessory.addService(this.platform.Service.Switch, 'Foot Up', 'foot-up');
 
-    this.footService.getCharacteristic(this.platform.Characteristic.Brightness)
-      .onSet(this.setFootPosition.bind(this))
-      .onGet(this.getFootPosition.bind(this));
+    this.footUpService.getCharacteristic(this.platform.Characteristic.On)
+      .onSet(this.setFootUp.bind(this))
+      .onGet(this.getFootUp.bind(this));
 
-    // TV Preset service
+    // Foot Down switch
+    this.footDownService = this.accessory.getService('Foot Down') ||
+      this.accessory.addService(this.platform.Service.Switch, 'Foot Down', 'foot-down');
+
+    this.footDownService.getCharacteristic(this.platform.Characteristic.On)
+      .onSet(this.setFootDown.bind(this))
+      .onGet(this.getFootDown.bind(this));
+
+    // Preset services
+    this.flatPresetService = this.accessory.getService('Flat Position') ||
+      this.accessory.addService(this.platform.Service.Switch, 'Flat Position', 'flat-preset');
+
+    this.flatPresetService.getCharacteristic(this.platform.Characteristic.On)
+      .onSet(this.setFlatPreset.bind(this))
+      .onGet(this.getPresetState.bind(this));
+
+    this.zeroGPresetService = this.accessory.getService('Zero G') ||
+      this.accessory.addService(this.platform.Service.Switch, 'Zero G', 'zerog-preset');
+
+    this.zeroGPresetService.getCharacteristic(this.platform.Characteristic.On)
+      .onSet(this.setZeroGPreset.bind(this))
+      .onGet(this.getPresetState.bind(this));
+
+    this.antiSnorePresetService = this.accessory.getService('Anti Snore') ||
+      this.accessory.addService(this.platform.Service.Switch, 'Anti Snore', 'antisnore-preset');
+
+    this.antiSnorePresetService.getCharacteristic(this.platform.Characteristic.On)
+      .onSet(this.setAntiSnorePreset.bind(this))
+      .onGet(this.getPresetState.bind(this));
+
     this.tvPresetService = this.accessory.getService('TV Position') ||
       this.accessory.addService(this.platform.Service.Switch, 'TV Position', 'tv-preset');
 
     this.tvPresetService.getCharacteristic(this.platform.Characteristic.On)
       .onSet(this.setTVPreset.bind(this))
-      .onGet(this.getTVPreset.bind(this));
+      .onGet(this.getPresetState.bind(this));
 
     // Initialize device with retries
     this.initializeDeviceWithRetry();
     
-    // Start polling for updates
-    setInterval(() => this.updateState(), this.platform.config.refreshInterval * 1000 || 30000);
+    // Start polling for updates (only for environment sensors)
+    if (this.platform.config.enableEnvironmentSensors) {
+      setInterval(() => this.updateState(), this.platform.config.refreshInterval * 1000 || 30000);
+    }
   }
 
   private async initializeDeviceWithRetry(retryCount = 0) {
@@ -97,13 +127,6 @@ export class SleepTrackerAccessory {
   private async initializeDevice() {
     const deviceInfo = await this.client.getDeviceInfo(this.platform.config.deviceId);
     
-    // Set max angles from device capabilities
-    if (deviceInfo.motorMeta.capabilities.length > 0) {
-      const capability = deviceInfo.motorMeta.capabilities[0];
-      this.maxHeadAngle = capability.maxHeadAngle;
-      this.maxFootAngle = capability.maxFootAngle;
-    }
-
     // Setup environment sensors if enabled
     if (this.platform.config.enableEnvironmentSensors && deviceInfo.productFeatures.includes('env_sensors')) {
       this.setupEnvironmentSensors();
@@ -121,19 +144,11 @@ export class SleepTrackerAccessory {
   }
 
   private async updateState() {
-    if (!this.isInitialized) {
+    if (!this.isInitialized || !this.platform.config.enableEnvironmentSensors) {
       return;
     }
 
     try {
-      const snapshots = await this.client.getDeviceSnapshot(Commands.Status);
-      
-      // Update position states and last known state
-      this.headPosition = snapshots.headPosition;
-      this.footPosition = snapshots.footPosition;
-      this.lastKnownState.head = snapshots.headPosition;
-      this.lastKnownState.foot = snapshots.footPosition;
-
       // Update environment sensors if available
       if (this.temperatureService || this.humidityService) {
         const sensorData = await this.client.getEnvironmentSensorData(this.platform.config.deviceId);
@@ -155,81 +170,123 @@ export class SleepTrackerAccessory {
         }
       }
     } catch (error) {
-      this.platform.log.error('Failed to update state:', error);
-      // Restore last known state
-      this.headPosition = this.lastKnownState.head;
-      this.footPosition = this.lastKnownState.foot;
+      this.platform.log.error('Failed to update environment sensors:', error);
     }
   }
 
-  private async sendCommandWithRetry(command: Commands, targetPosition?: number, retryCount = 0): Promise<void> {
+  private async sendCommandWithRetry(command: Commands, retryCount = 0): Promise<void> {
     try {
-      if (targetPosition !== undefined) {
-        await this.client.sendCommand(this.platform.config.deviceId, command, 0, targetPosition);
-      } else {
-        await this.client.sendCommand(this.platform.config.deviceId, command);
-      }
+      await this.client.sendCommand(this.platform.config.deviceId, command);
     } catch (error) {
       if (retryCount < this.MAX_RETRIES) {
         this.platform.log.warn(`Command failed, retrying in ${this.RETRY_DELAY}ms...`);
         await new Promise(resolve => setTimeout(resolve, this.RETRY_DELAY));
-        return this.sendCommandWithRetry(command, targetPosition, retryCount + 1);
+        return this.sendCommandWithRetry(command, retryCount + 1);
       }
       throw error;
     }
   }
 
   // Head position handlers
-  private async setHeadOn(value: CharacteristicValue) {
-    if (!value) {
-      await this.sendCommandWithRetry(Commands.Flat);
+  private async setHeadUp(value: CharacteristicValue) {
+    if (value) {
+      await this.sendCommandWithRetry(Commands.HeadUp);
+      // Reset switch after 1 second
+      setTimeout(() => {
+        this.headUpService.updateCharacteristic(this.platform.Characteristic.On, false);
+      }, 1000);
     }
   }
 
-  private async getHeadOn(): Promise<CharacteristicValue> {
-    return this.headPosition > 0;
+  private async getHeadUp(): Promise<CharacteristicValue> {
+    return false;
   }
 
-  private async setHeadPosition(value: CharacteristicValue) {
-    const targetPosition = this.scalePosition(value as number, this.maxHeadAngle);
-    const command = targetPosition > this.headPosition ? Commands.HeadUp : Commands.HeadDown;
-    await this.sendCommandWithRetry(command, targetPosition);
+  private async setHeadDown(value: CharacteristicValue) {
+    if (value) {
+      await this.sendCommandWithRetry(Commands.HeadDown);
+      // Reset switch after 1 second
+      setTimeout(() => {
+        this.headDownService.updateCharacteristic(this.platform.Characteristic.On, false);
+      }, 1000);
+    }
   }
 
-  private async getHeadPosition(): Promise<CharacteristicValue> {
-    return this.normalizePosition(this.headPosition, this.maxHeadAngle);
+  private async getHeadDown(): Promise<CharacteristicValue> {
+    return false;
   }
 
   // Foot position handlers
-  private async setFootOn(value: CharacteristicValue) {
-    if (!value) {
-      await this.sendCommandWithRetry(Commands.Flat);
+  private async setFootUp(value: CharacteristicValue) {
+    if (value) {
+      await this.sendCommandWithRetry(Commands.FootUp);
+      // Reset switch after 1 second
+      setTimeout(() => {
+        this.footUpService.updateCharacteristic(this.platform.Characteristic.On, false);
+      }, 1000);
     }
   }
 
-  private async getFootOn(): Promise<CharacteristicValue> {
-    return this.footPosition > 0;
+  private async getFootUp(): Promise<CharacteristicValue> {
+    return false;
   }
 
-  private async setFootPosition(value: CharacteristicValue) {
-    const targetPosition = this.scalePosition(value as number, this.maxFootAngle);
-    const command = targetPosition > this.footPosition ? Commands.FootUp : Commands.FootDown;
-    await this.sendCommandWithRetry(command, targetPosition);
+  private async setFootDown(value: CharacteristicValue) {
+    if (value) {
+      await this.sendCommandWithRetry(Commands.FootDown);
+      // Reset switch after 1 second
+      setTimeout(() => {
+        this.footDownService.updateCharacteristic(this.platform.Characteristic.On, false);
+      }, 1000);
+    }
   }
 
-  private async getFootPosition(): Promise<CharacteristicValue> {
-    return this.normalizePosition(this.footPosition, this.maxFootAngle);
+  private async getFootDown(): Promise<CharacteristicValue> {
+    return false;
   }
 
-  // TV Preset handlers
+  // Preset handlers
+  private async setFlatPreset(value: CharacteristicValue) {
+    if (value) {
+      try {
+        await this.sendCommandWithRetry(Commands.Flat);
+        this.resetPresetSwitch(this.flatPresetService);
+      } catch (error) {
+        this.platform.log.error('Failed to set Flat preset:', error);
+        throw error;
+      }
+    }
+  }
+
+  private async setZeroGPreset(value: CharacteristicValue) {
+    if (value) {
+      try {
+        await this.sendCommandWithRetry(Commands.ZeroG);
+        this.resetPresetSwitch(this.zeroGPresetService);
+      } catch (error) {
+        this.platform.log.error('Failed to set Zero G preset:', error);
+        throw error;
+      }
+    }
+  }
+
+  private async setAntiSnorePreset(value: CharacteristicValue) {
+    if (value) {
+      try {
+        await this.sendCommandWithRetry(Commands.AntiSnore);
+        this.resetPresetSwitch(this.antiSnorePresetService);
+      } catch (error) {
+        this.platform.log.error('Failed to set Anti Snore preset:', error);
+        throw error;
+      }
+    }
+  }
+
   private async setTVPreset(value: CharacteristicValue) {
     if (value) {
       try {
         await this.sendCommandWithRetry(Commands.TV);
-        // Reset the switch after 1 second
-        setTimeout(() => {
-          this.tvPresetService.updateCharacteristic(this.platform.Characteristic.On, false);
-        }, 1000);
+        this.resetPresetSwitch(this.tvPresetService);
       } catch (error) {
         this.platform.log.error('Failed to set TV preset:', error);
         throw error;
@@ -237,17 +294,13 @@ export class SleepTrackerAccessory {
     }
   }
 
-  private async getTVPreset(): Promise<CharacteristicValue> {
-    // Always return false as this is a stateless switch
+  private async getPresetState(): Promise<CharacteristicValue> {
     return false;
   }
 
-  // Utility functions
-  private scalePosition(percentage: number, maxAngle: number): number {
-    return Math.round((percentage / 100) * maxAngle);
-  }
-
-  private normalizePosition(position: number, maxAngle: number): number {
-    return Math.round((position / maxAngle) * 100);
+  private resetPresetSwitch(service: Service) {
+    setTimeout(() => {
+      service.updateCharacteristic(this.platform.Characteristic.On, false);
+    }, 1000);
   }
 } 
