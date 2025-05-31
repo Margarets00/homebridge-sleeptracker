@@ -190,59 +190,91 @@ export class SleepTrackerAccessory {
   // Head position handlers
   private async setHeadUp(value: CharacteristicValue) {
     if (value) {
-      await this.sendCommandWithRetry(Commands.HeadUp);
-      // Reset switch after 1 second
-      setTimeout(() => {
-        this.headUpService.updateCharacteristic(this.platform.Characteristic.On, false);
-      }, 1000);
+      try {
+        await this.sendCommandWithRetry(Commands.HeadUp);
+      } catch (error) {
+        this.platform.log.error('Failed to start head up movement:', error);
+        throw error;
+      }
+    } else {
+      try {
+        await this.sendCommandWithRetry(Commands.Stop);
+      } catch (error) {
+        this.platform.log.error('Failed to stop movement:', error);
+        throw error;
+      }
     }
   }
 
   private async getHeadUp(): Promise<CharacteristicValue> {
-    return false;
+    return false; // Always return false to allow toggling
   }
 
   private async setHeadDown(value: CharacteristicValue) {
     if (value) {
-      await this.sendCommandWithRetry(Commands.HeadDown);
-      // Reset switch after 1 second
-      setTimeout(() => {
-        this.headDownService.updateCharacteristic(this.platform.Characteristic.On, false);
-      }, 1000);
+      try {
+        await this.sendCommandWithRetry(Commands.HeadDown);
+      } catch (error) {
+        this.platform.log.error('Failed to start head down movement:', error);
+        throw error;
+      }
+    } else {
+      try {
+        await this.sendCommandWithRetry(Commands.Stop);
+      } catch (error) {
+        this.platform.log.error('Failed to stop movement:', error);
+        throw error;
+      }
     }
   }
 
   private async getHeadDown(): Promise<CharacteristicValue> {
-    return false;
+    return false; // Always return false to allow toggling
   }
 
   // Foot position handlers
   private async setFootUp(value: CharacteristicValue) {
     if (value) {
-      await this.sendCommandWithRetry(Commands.FootUp);
-      // Reset switch after 1 second
-      setTimeout(() => {
-        this.footUpService.updateCharacteristic(this.platform.Characteristic.On, false);
-      }, 1000);
+      try {
+        await this.sendCommandWithRetry(Commands.FootUp);
+      } catch (error) {
+        this.platform.log.error('Failed to start foot up movement:', error);
+        throw error;
+      }
+    } else {
+      try {
+        await this.sendCommandWithRetry(Commands.Stop);
+      } catch (error) {
+        this.platform.log.error('Failed to stop movement:', error);
+        throw error;
+      }
     }
   }
 
   private async getFootUp(): Promise<CharacteristicValue> {
-    return false;
+    return false; // Always return false to allow toggling
   }
 
   private async setFootDown(value: CharacteristicValue) {
     if (value) {
-      await this.sendCommandWithRetry(Commands.FootDown);
-      // Reset switch after 1 second
-      setTimeout(() => {
-        this.footDownService.updateCharacteristic(this.platform.Characteristic.On, false);
-      }, 1000);
+      try {
+        await this.sendCommandWithRetry(Commands.FootDown);
+      } catch (error) {
+        this.platform.log.error('Failed to start foot down movement:', error);
+        throw error;
+      }
+    } else {
+      try {
+        await this.sendCommandWithRetry(Commands.Stop);
+      } catch (error) {
+        this.platform.log.error('Failed to stop movement:', error);
+        throw error;
+      }
     }
   }
 
   private async getFootDown(): Promise<CharacteristicValue> {
-    return false;
+    return false; // Always return false to allow toggling
   }
 
   // Preset handlers
