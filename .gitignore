@@ -1,6 +1,30 @@
+# Dependencies
 node_modules/
+
+# Build
 dist/
+*.tsbuildinfo
+
+# IDE
+.idea/
+.vscode/
+
+# Logs
 *.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+
+# Configuration
+config.json
+.homebridge/
+
 .DS_Store
 .env
 *.tgz 
+
+# Test coverage
+coverage/
