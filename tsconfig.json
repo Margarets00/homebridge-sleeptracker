@@ -12,13 +12,15 @@
     "declarationMap": true,
     "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
+    "rootDir": ".",
     "strict": true,
     "esModuleInterop": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["jest", "node"]
   },
   "include": [
-    "src/"
+    "src/",
+    "__tests__/"
   ],
   "exclude": [
     "node_modules",
