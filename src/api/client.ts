@@ -117,17 +117,20 @@ export class SleepTrackerClient {
   }
 
   async sendCommand(deviceId: string, command: Commands, side: number = 0, targetPosition?: number): Promise<void> {
+    await this.authenticate();
     const commandValue = this.getCommandValue(command);
     
-    const response = await this.post('/processor/adjustableBaseControls', {
+    const response = await this.api.post('/adjustableBaseControls', {
+      ...CLIENT_INFO,
+      id: 'TEST_ANDROID_adjustableBaseControls',
       sleeptrackerProcessorID: deviceId,
       bedControlCommand: commandValue,
       side: side,
       ...(targetPosition !== undefined && { targetPosition: targetPosition })
     });
 
-    if (response.statusCode !== 0) {
-      throw new Error(`Command failed: ${response.statusMessage}`);
+    if (response.data.statusCode !== 0) {
+      throw new Error(`Command failed: ${response.data.statusMessage}`);
     }
   }
 
