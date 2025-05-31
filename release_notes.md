@@ -18,3 +18,15 @@ Initial stable release of the Homebridge SleepTracker plugin.
 - CI/CD pipeline with GitHub Actions
 - Code quality checks with CodeQL
 - Comprehensive error handling
+
+# Release v1.0.2
+
+## What's Changed
+* Updated GitHub Actions workflows
+  * Added build workflow for testing and building
+  * Added CodeQL workflow for security analysis
+* Improved documentation
+* Fixed git hooks configuration
+
+## Full Changelog
+https://github.com/Margarets00/homebridge-sleeptracker/compare/v1.0.1...v1.0.2
