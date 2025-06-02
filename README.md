@@ -3,7 +3,6 @@
 [English](README.md) | [한국어](README.ko.md)
 
 [![npm version](https://badge.fury.io/js/homebridge-sleeptracker.svg)](https://badge.fury.io/js/homebridge-sleeptracker)
-[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build and Test](https://github.com/Margarets00/homebridge-sleeptracker/actions/workflows/build.yml/badge.svg)](https://github.com/Margarets00/homebridge-sleeptracker/actions/workflows/build.yml)
 [![CodeQL](https://github.com/Margarets00/homebridge-sleeptracker/actions/workflows/codeql.yml/badge.svg)](https://github.com/Margarets00/homebridge-sleeptracker/actions/workflows/codeql.yml)
