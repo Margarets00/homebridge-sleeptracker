@@ -1,5 +1,11 @@
 # 홈브릿지 슬립트래커 플러그인
 
+[![npm version](https://badge.fury.io/js/homebridge-sleeptracker.svg)](https://badge.fury.io/js/homebridge-sleeptracker)
+[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build and Test](https://github.com/Margarets00/homebridge-sleeptracker/actions/workflows/build.yml/badge.svg)](https://github.com/Margarets00/homebridge-sleeptracker/actions/workflows/build.yml)
+[![CodeQL](https://github.com/Margarets00/homebridge-sleeptracker/actions/workflows/codeql.yml/badge.svg)](https://github.com/Margarets00/homebridge-sleeptracker/actions/workflows/codeql.yml)
+
 이 플러그인을 통해 슬립트래커 스마트 침대를 HomeKit으로 제어할 수 있습니다. 홈 앱을 통해 침대 위치 조절, 프리셋 포지션 설정, 환경 센서 모니터링이 가능합니다.
 
 ## 기능
@@ -53,6 +59,19 @@ npm install -g homebridge-sleeptracker
   ]
 }
 ```
+
+## 기기 ID 확인하기
+
+플러그인을 설정하기 전에 슬립트래커 기기 ID를 확인해야 합니다. [sleeptracker-tools](https://github.com/Margarets00/sleeptracker-tools) 유틸리티를 사용하여 기기 ID를 확인할 수 있습니다:
+
+1. 유틸리티 설치:
+```bash
+npx sleeptracker-tools
+```
+
+2. 슬립트래커 계정으로 로그인
+3. 도구가 침대 정보와 함께 기기 ID를 표시합니다
+4. 기기 ID를 복사하여 홈브릿지 설정에 사용하세요
 
 ## 설정
 

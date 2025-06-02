@@ -2,6 +2,12 @@
 
 [English](README.md) | [한국어](README.ko.md)
 
+[![npm version](https://badge.fury.io/js/homebridge-sleeptracker.svg)](https://badge.fury.io/js/homebridge-sleeptracker)
+[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build and Test](https://github.com/Margarets00/homebridge-sleeptracker/actions/workflows/build.yml/badge.svg)](https://github.com/Margarets00/homebridge-sleeptracker/actions/workflows/build.yml)
+[![CodeQL](https://github.com/Margarets00/homebridge-sleeptracker/actions/workflows/codeql.yml/badge.svg)](https://github.com/Margarets00/homebridge-sleeptracker/actions/workflows/codeql.yml)
+
 This plugin allows you to control your SleepTracker smart bed through HomeKit. Control bed positions, access preset positions, and monitor environment sensors all through the Home app.
 
 ## Features
@@ -55,6 +61,19 @@ npm install -g homebridge-sleeptracker
   ]
 }
 ```
+
+## Getting Your Device ID
+
+Before configuring the plugin, you'll need to get your SleepTracker device ID. You can obtain this using the [sleeptracker-tools](https://github.com/Margarets00/sleeptracker-tools) utility:
+
+1. Install the utility:
+```bash
+npx sleeptracker-tools
+```
+
+2. Follow the prompts to log in with your SleepTracker credentials
+3. The tool will display your device ID along with other bed information
+4. Copy the device ID and use it in your Homebridge configuration
 
 ## Configuration
 
@@ -141,79 +160,3 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## Disclaimer
 
 This plugin is not affiliated with, endorsed by, or connected to SleepTracker or its parent company. Use at your own risk.
-
----
-
-# 홈브릿지 슬립트래커 플러그인
-
-Apple HomeKit을 통해 SleepTracker 스마트 침대를 제어할 수 있는 홈브릿지 플러그인입니다. 홈 앱에서 침대 위치 조절, 프리셋 설정, 환경 센서 모니터링 등을 할 수 있습니다.
-
-## 기능
-
-- 머리/발 위치 조절
-- 프리셋 위치 (평평하게, 제로G, 코골이 방지, TV 시청)
-- 환경 센서 지원 (온도 및 습도, 지원 모델에 한함)
-- HomeKit을 통한 직관적인 제어
-
-## 설치 방법
-
-홈브릿지 Config UI X를 통해 설치하거나 수동으로 설치할 수 있습니다:
-
-```bash
-npm install -g homebridge-sleeptracker
-```
-
-## 설정
-
-홈브릿지 config.json에 다음 내용을 추가하세요:
-
-```json
-{
-    "platforms": [
-        {
-            "platform": "SleepTracker",
-            "name": "SleepTracker",
-            "username": "이메일주소",
-            "password": "비밀번호",
-            "deviceId": "기기ID",
-            "enableEnvironmentSensors": true,
-            "refreshInterval": 30
-        }
-    ]
-}
-```
-
-### 설정 옵션
-
-- `username`: SleepTracker 계정 이메일
-- `password`: SleepTracker 계정 비밀번호
-- `deviceId`: 침대의 기기 ID
-- `enableEnvironmentSensors`: (선택) 온도/습도 센서 활성화 (지원 모델에 한함)
-- `refreshInterval`: (선택) 센서 업데이트 주기(초) (기본값: 30)
-
-## 사용 방법
-
-설치 및 설정 후:
-
-1. 홈브릿지 재시작
-2. 홈 앱에 침대가 표시됨
-3. 스위치로 침대 위치 조절:
-   - 머리 올리기/내리기
-   - 발 올리기/내리기
-4. 프리셋 버튼으로 빠른 위치 변경:
-   - 평평하게
-   - 제로G
-   - 코골이 방지
-   - TV 시청
-
-## 지원
-
-버그 신고, 기능 요청 또는 문의사항은 [이슈 페이지](https://github.com/Margarets00/homebridge-sleeptracker/issues)를 이용해 주세요.
-
-## 라이선스
-
-이 프로젝트는 MIT 라이선스를 따릅니다 - 자세한 내용은 LICENSE 파일을 참조하세요.
-
-## 면책 조항
-
-이 플러그인은 비공식 플러그인이며 SleepTracker 또는 그 모회사와 제휴, 보증 또는 연관되어 있지 않습니다. 사용상의 책임은 사용자에게 있습니다. 
